@@ -12,6 +12,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import org.apache.kafka.common.TopicPartition;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3;
@@ -37,18 +40,18 @@ import com.spredfast.kafka.connect.s3.json.ChunksIndex;
  */
 public class S3Writer {
 	private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
-	private final ObjectReader reader = new ObjectMapper().reader(ChunksIndex.class);
+	private final ObjectReader reader = new ObjectMapper().readerFor(ChunksIndex.class);
 	private String keyPrefix;
 	private String bucket;
 	private AmazonS3 s3Client;
 	private TransferManager tm;
 
 	public S3Writer(String bucket, String keyPrefix) {
-		this(bucket, keyPrefix, new AmazonS3Client(new ProfileCredentialsProvider()));
+		this(bucket, keyPrefix, AmazonS3ClientBuilder.standard().withCredentials(new ProfileCredentialsProvider()).build());
 	}
 
 	public S3Writer(String bucket, String keyPrefix, AmazonS3 s3Client) {
-		this(bucket, keyPrefix, s3Client, new TransferManager(s3Client));
+		this(bucket, keyPrefix, s3Client, TransferManagerBuilder.standard().withS3Client(s3Client).build());
 	}
 
 	public S3Writer(String bucket, String keyPrefix, AmazonS3 s3Client, TransferManager tm) {

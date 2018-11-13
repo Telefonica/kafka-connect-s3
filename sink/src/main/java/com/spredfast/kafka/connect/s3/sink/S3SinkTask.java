@@ -77,6 +77,7 @@ public class S3SinkTask extends SinkTask {
 			.orElseThrow(() -> new ConnectException("S3 bucket must be configured"));
 		String prefix = configGet("s3.prefix")
 			.orElse("");
+
 		AmazonS3 s3Client = S3.s3client(config);
 
 		s3 = new S3Writer(bucket, prefix, s3Client);
